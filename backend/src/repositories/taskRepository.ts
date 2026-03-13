@@ -1,3 +1,4 @@
+import { error } from "node:console";
 import { prisma } from "../config/prisma.js";
 
 export async function createTask(
@@ -22,5 +23,32 @@ export async function findTasksByUser(user_id: string) {
     orderBy: {
       created_at: "desc",
     },
+  });
+}
+
+export async function findTaskById(taskId: string) {
+  return prisma.task.findUnique({
+    where: { id: taskId },
+  });
+}
+
+export async function updateTask(
+  taskId: string,
+  title?: string,
+  description?: string,
+) {
+  const data: any = {};
+
+  if (title !== undefined) {
+    data.title = title;
+  }
+
+  if (description !== undefined) {
+    data.description = description;
+  }
+
+  return prisma.task.update({
+    where: { id: taskId },
+    data,
   });
 }
