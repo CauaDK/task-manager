@@ -3,6 +3,7 @@ import {
   findTasksByUser,
   findTaskById,
   updateTask,
+  updateStatusbyTaskId,
 } from "../repositories/taskRepository.js";
 
 export async function createTaskService(
@@ -46,4 +47,18 @@ export async function updateTaskService(
   }
 
   return updateTask(taskId, title, description);
+}
+
+export async function updateTaskStatus(taskId: string, userId: string) {
+  const task = await findTaskById(taskId);
+
+  if (!task) {
+    throw new Error("Task not found");
+  }
+
+  if (task.user_id !== userId) {
+    throw new Error("Unauthorized");
+  }
+
+  return updateStatusbyTaskId(taskId, "completed");
 }

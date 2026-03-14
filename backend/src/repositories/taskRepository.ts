@@ -52,3 +52,10 @@ export async function updateTask(
     data,
   });
 }
+
+export async function updateStatusbyTaskId(taskId: string, status: string) {
+  return prisma.task.update({
+    where: { id: taskId },
+    data: { status },
+  });
+}

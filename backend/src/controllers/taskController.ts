@@ -3,6 +3,7 @@ import {
   createTaskService,
   getUserTasks,
   updateTaskService,
+  updateTaskStatus,
 } from "../services/taskService.js";
 
 export async function createTask(req: Request, res: Response) {
@@ -40,6 +41,22 @@ export async function updateTask(req: Request, res: Response) {
     const task = await updateTaskService(taskId, userId, title, description);
 
     return res.json(task);
+  } catch (error) {
+    return res.status(400).json({
+      error: (error as Error).message,
+    });
+  }
+}
+
+export async function updateStatus(req: Request, res: Response) {
+  try {
+    const taskId = req.params.id as string;
+
+    const userId = (req as any).user.userId;
+
+    const status = await updateTaskStatus(taskId, userId);
+
+    return res.json(status);
   } catch (error) {
     return res.status(400).json({
       error: (error as Error).message,
