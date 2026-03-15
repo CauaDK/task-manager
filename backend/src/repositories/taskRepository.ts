@@ -15,7 +15,18 @@ export async function createTask(
   });
 }
 
-export async function findTasksByUser(user_id: string) {
+export async function findTasksByUser(user_id: string, status?: string) {
+  if (status) {
+    return prisma.task.findMany({
+      where: {
+        user_id,
+        status: status,
+      },
+      orderBy: {
+        created_at: "desc",
+      },
+    });
+  }
   return prisma.task.findMany({
     where: {
       user_id,
@@ -58,4 +69,41 @@ export async function updateStatusbyTaskId(taskId: string, status: string) {
     where: { id: taskId },
     data: { status },
   });
+}
+
+export async function deleteTask(taskId: string) {
+  return prisma.task.delete({
+    where: { id: taskId },
+  });
+}
+
+export async function getTaskStatus(userId: string) {
+  const status = await prisma.task.groupBy({
+    by: ["status"],
+    where: {
+      user_id: userId,
+    },
+    _count: {
+      status: true,
+    },
+  });
+
+  let pending: number = 0;
+  let completed: number = 0;
+
+  status.forEach((item) => {
+    if (item.status === "pending") {
+      pending = item._count.status;
+    }
+
+    if (item.status === "completed") {
+      completed = item._count.status;
+    }
+  });
+
+  return {
+    total: pending + completed,
+    pending,
+    completed,
+  };
 }

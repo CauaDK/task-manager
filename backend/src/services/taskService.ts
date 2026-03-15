@@ -4,6 +4,8 @@ import {
   findTaskById,
   updateTask,
   updateStatusbyTaskId,
+  deleteTask,
+  getTaskStatus,
 } from "../repositories/taskRepository.js";
 
 export async function createTaskService(
@@ -18,8 +20,14 @@ export async function createTaskService(
   return createTask(title, description, userId);
 }
 
-export async function getUserTasks(userId: string) {
-  return findTasksByUser(userId);
+export async function getUserTasks(userId: string, status?: string) {
+  const typeStatus = ["pending", "completed"];
+
+  if (status && !typeStatus.includes(status)) {
+    throw new Error("Invalid status");
+  }
+
+  return findTasksByUser(userId, status);
 }
 
 export async function updateTaskService(
@@ -61,4 +69,22 @@ export async function updateTaskStatus(taskId: string, userId: string) {
   }
 
   return updateStatusbyTaskId(taskId, "completed");
+}
+
+export async function deleteTaskService(taskId: string, userId: string) {
+  const task = await findTaskById(taskId);
+
+  if (!task) {
+    throw new Error("Task not found");
+  }
+
+  if (task.user_id !== userId) {
+    throw new Error("Unauthorized");
+  }
+
+  return deleteTask(taskId);
+}
+
+export async function getTaskStatusService(userId: string) {
+  return getTaskStatus(userId);
 }
