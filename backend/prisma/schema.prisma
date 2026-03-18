@@ -7,6 +7,11 @@ datasource db {
   provider = "postgresql"
 }
 
+enum Status {
+  pending
+  completed
+}
+
 model User {
   id         String   @id @default(uuid()) @db.Uuid
   name       String
@@ -14,17 +19,44 @@ model User {
   password   String
   created_at DateTime @default(now())
 
-  tasks Task[]
+  tasks    Task[]
+  projects UserProject[]
 }
 
 model Task {
   id          String   @id @default(uuid()) @db.Uuid
   title       String
   description String?
-  status      String   @default("pending")
-  user_id     String   @db.Uuid
+  status      Status   @default(pending)
+  due_date    DateTime
+  user_id     String?  @db.Uuid
+  project_id  String?  @db.Uuid
   created_at  DateTime @default(now())
   updated_at  DateTime @updatedAt
 
-  user User @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  user    User?    @relation(fields: [user_id], references: [id])
+  project Project? @relation(fields: [project_id], references: [id], onDelete: Cascade)
+}
+
+model Project {
+  id          String   @id @default(uuid()) @db.Uuid
+  name        String
+  description String?
+  due_date    DateTime
+  created_at  DateTime @default(now())
+
+  tasks   Task[]
+  members UserProject[]
+}
+
+model UserProject {
+  id String @id @default(uuid()) @db.Uuid
+
+  user_id    String @db.Uuid
+  project_id String @db.Uuid
+
+  user    User    @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  project Project @relation(fields: [project_id], references: [id], onDelete: Cascade)
+
+  @@unique([user_id, project_id])
 }

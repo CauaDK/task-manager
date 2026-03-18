@@ -11,16 +11,20 @@ import {
 export async function createTaskService(
   title: string,
   description: string | null,
+  dueDate: string,
   userId: string,
 ) {
   if (!title) {
     throw new Error("Title is required");
   }
 
-  return createTask(title, description, userId);
+  return createTask(title, description, dueDate, userId);
 }
 
-export async function getUserTasks(userId: string, status?: string) {
+export async function getUserTasks(
+  userId: string,
+  status?: "pending" | "completed",
+) {
   const typeStatus = ["pending", "completed"];
 
   if (status && !typeStatus.includes(status)) {
@@ -35,6 +39,7 @@ export async function updateTaskService(
   userId: string,
   title?: string,
   description?: string,
+  dueDate?: string,
 ) {
   const task = await findTaskById(taskId);
 
@@ -50,11 +55,15 @@ export async function updateTaskService(
     throw new Error("Title cannot be empty");
   }
 
-  if (title === undefined && description === undefined) {
+  if (
+    title === undefined &&
+    description === undefined &&
+    dueDate === undefined
+  ) {
     throw new Error("Nothing to update");
   }
 
-  return updateTask(taskId, title, description);
+  return updateTask(taskId, title, description, dueDate);
 }
 
 export async function updateTaskStatus(taskId: string, userId: string) {

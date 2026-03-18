@@ -4,18 +4,23 @@ import { prisma } from "../config/prisma.js";
 export async function createTask(
   title: string,
   description: string | null,
+  due_date: string,
   user_id: string,
 ) {
   return prisma.task.create({
     data: {
       title,
       description,
+      due_date,
       user_id,
     },
   });
 }
 
-export async function findTasksByUser(user_id: string, status?: string) {
+export async function findTasksByUser(
+  user_id: string,
+  status?: "pending" | "completed",
+) {
   if (status) {
     return prisma.task.findMany({
       where: {
@@ -47,6 +52,7 @@ export async function updateTask(
   taskId: string,
   title?: string,
   description?: string,
+  dueDate?: string,
 ) {
   const data: any = {};
 
@@ -58,13 +64,20 @@ export async function updateTask(
     data.description = description;
   }
 
+  if (dueDate !== undefined) {
+    data.due_date = dueDate;
+  }
+
   return prisma.task.update({
     where: { id: taskId },
     data,
   });
 }
 
-export async function updateStatusbyTaskId(taskId: string, status: string) {
+export async function updateStatusbyTaskId(
+  taskId: string,
+  status: "completed",
+) {
   return prisma.task.update({
     where: { id: taskId },
     data: { status },

@@ -11,10 +11,10 @@ import type { StringFieldRefInput } from "../../generated/prisma/internal/prisma
 
 export async function createTask(req: Request, res: Response) {
   try {
-    const { title, description } = req.body;
+    const { title, description, due_date } = req.body;
     const userId = (req as any).user.userId;
 
-    const task = await createTaskService(title, description, userId);
+    const task = await createTaskService(title, description, due_date, userId);
 
     return res.status(201).json(task);
   } catch (error) {
@@ -26,7 +26,7 @@ export async function getTasks(req: Request, res: Response) {
   try {
     const userId = (req as any).user.userId;
 
-    const status = req.query.status as string | undefined;
+    const status = req.query.status as "pending" | "completed" | undefined;
 
     const tasks = await getUserTasks(userId, status);
 
@@ -39,11 +39,17 @@ export async function getTasks(req: Request, res: Response) {
 export async function updateTask(req: Request, res: Response) {
   try {
     const taskId = req.params.id as string;
-    const { title, description } = req.body;
+    const { title, description, due_date } = req.body;
 
     const userId = (req as any).user.userId;
 
-    const task = await updateTaskService(taskId, userId, title, description);
+    const task = await updateTaskService(
+      taskId,
+      userId,
+      title,
+      description,
+      due_date,
+    );
 
     return res.json(task);
   } catch (error) {
